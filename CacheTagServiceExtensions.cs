@@ -8,36 +8,34 @@ using System.Reflection;
 
 namespace CacheTagService
 {
-  public static class CacheTagServiceExtensions
-  {
-    public static List<T> GetCacheKeys<T>(this IMemoryCache memoryCache)
+    public static class CacheTagServiceExtensions
     {
-      if (memoryCache.GetType() != typeof(MemoryCache))
-        throw new NotSupportedException("Argument muse be of type MemoryCache");
-      var field = typeof(MemoryCache).GetProperty("EntriesCollection", BindingFlags.NonPublic | BindingFlags.Instance);
-      var collection = field.GetValue(memoryCache) as ICollection;
-      var items = new List<T>();
-      if (collection != null)
-        foreach (var item in collection)
+        public static List<T> GetCacheKeys<T>(this IMemoryCache memoryCache)
         {
-          var methodInfo = item.GetType().GetProperty("Key");
-          var val = methodInfo.GetValue(item);
-          if (val is T k)
-            items.Add(k);
+            if (memoryCache.GetType() != typeof(MemoryCache))
+                throw new NotSupportedException("Argument muse be of type MemoryCache");
+            var field = typeof(MemoryCache).GetProperty("EntriesCollection", BindingFlags.NonPublic | BindingFlags.Instance);
+            var collection = field.GetValue(memoryCache) as ICollection;
+            var items = new List<T>();
+            if (collection != null)
+                foreach (var item in collection)
+                {
+                    var methodInfo = item.GetType().GetProperty("Key");
+                    var val = methodInfo.GetValue(item);
+                    if (val is T k)
+                        items.Add(k);
+                }
+            return items;
         }
-      return items;
+
+        public static void AddCacheTagService(this IServiceCollection services)
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            services.TryAddSingleton<ICacheTagService, CacheTagService>();
+        }
     }
-
-    public static IMvcCoreBuilder AddCacheTagService(this IMvcCoreBuilder builder)
-    {
-      if (builder == null)
-      {
-        throw new ArgumentNullException(nameof(builder));
-      }
-
-      builder.Services.TryAddSingleton<ICacheTagService, CacheTagService>();
-
-      return builder;
-    }
-  }
 }

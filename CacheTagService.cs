@@ -10,34 +10,34 @@ namespace CacheTagService
 {
     public interface ICacheTagService
     {
-    IList<ReadableCacheTagKey> GetKeys();
-    void Remove(ReadableCacheTagKey key);
-    void RemoveWhere(Func<ReadableCacheTagKey, bool> predicate);
+        IList<ReadableCacheTagKey> GetKeys();
+        void Remove(ReadableCacheTagKey key);
+        void RemoveWhere(Func<ReadableCacheTagKey, bool> predicate);
     }
 
-  public class CacheTagService : ICacheTagService
-  {
-    private IMemoryCache memoryCache;
-
-    public CacheTagService(CacheTagHelperMemoryCacheFactory factory)
+    public class CacheTagService : ICacheTagService
     {
-      memoryCache = factory.Cache;
-    }
+        private IMemoryCache memoryCache;
 
-    public IList<ReadableCacheTagKey> GetKeys()
-    {
-      return memoryCache.GetCacheKeys<CacheTagKey>().Select(k => new ReadableCacheTagKey(k)).ToList();
-    }
+        public CacheTagService(CacheTagHelperMemoryCacheFactory factory)
+        {
+            memoryCache = factory.Cache;
+        }
 
-    public void Remove(ReadableCacheTagKey key)
-    {
-      memoryCache.Remove(key.CacheTagKey);
-    }
+        public IList<ReadableCacheTagKey> GetKeys()
+        {
+            return memoryCache.GetCacheKeys<CacheTagKey>().Select(k => new ReadableCacheTagKey(k)).ToList();
+        }
 
-    public void RemoveWhere(Func<ReadableCacheTagKey, bool> predicate)
-    {
-      foreach (var k in GetKeys().Where(predicate))
-        Remove(k);
+        public void Remove(ReadableCacheTagKey key)
+        {
+            memoryCache.Remove(key.CacheTagKey);
+        }
+
+        public void RemoveWhere(Func<ReadableCacheTagKey, bool> predicate)
+        {
+            foreach (var k in GetKeys().Where(predicate))
+                Remove(k);
+        }
     }
-  }
 }
